@@ -2,6 +2,14 @@
 name = "smol-layout"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "Gabe Weiner <gabe@npcstudio.com>",
+    "Jonathan Spira <jack@gmail.com>",
+]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/NPC-Studio/smol-layout"
+description = "a small layout utility for very simple pixel art games"
+categories = ["game-development"]
 
 [build-dependencies]
 regex = "1"

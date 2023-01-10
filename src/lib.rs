@@ -1,3 +1,5 @@
+//! This is a basic newline layout library. It is designed for very limited uses, and users are encouraged to find a better layouting solution.
+
 use std::collections::HashMap;
 
 use core::iter::once;
@@ -8,15 +10,15 @@ include!(concat!(env!("OUT_DIR"), "/tables.rs"));
 
 /// Returns newlines where this text needs it.
 pub fn apply_newlines(
-    string: &str,
+    input: &str,
     max_width: usize,
     font: &HashMap<char, usize>,
 ) -> Result<String, LineBreakErr> {
     // Set up our output string and retrieve our linebreak information
     let mut output = String::new();
-    let mut breakers = linebreaks(string);
+    let mut breakers = linebreaks(input);
 
-    let mut chars: Vec<(char, Option<BreakOpportunity>)> = string
+    let mut chars: Vec<(char, Option<BreakOpportunity>)> = input
         .char_indices()
         .map(|(_, c)| (c, breakers.next().expect("linebreak issue in `inner`").1))
         .collect();
