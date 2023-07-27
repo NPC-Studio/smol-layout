@@ -45,6 +45,12 @@ pub fn apply_newlines(
             // Add the width of this character
             current_width += font.get(c).ok_or(LineBreakErr::MissingCharacterWidth(*c))?;
 
+            // We weren't over the limit, so we can continue -- but if this is a safe
+            // break point, let's remember that
+            if break_op.is_some() && cursor != 0 {
+                break_point = Some(cursor);
+            }
+
             // Are we over the max width now? If so, create a linebreak at our last
             // safe break point
             if current_width > max_width {
@@ -66,11 +72,6 @@ pub fn apply_newlines(
                 }
             }
 
-            // We weren't over the limit, so we can continue -- but if this is a safe
-            // break point, let's remember that
-            if break_op.is_some() && cursor != 0 {
-                break_point = Some(cursor);
-            }
         }
 
         // Once we're here, we check if we made it to the end of our characters.
