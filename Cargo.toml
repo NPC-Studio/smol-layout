@@ -13,6 +13,3 @@ categories = ["game-development"]
 
 [build-dependencies]
 regex = "1"
-
-[dependencies]
-thiserror = "1.0.38"

@@ -13,7 +13,7 @@ pub fn apply_newlines(
     input: &str,
     max_width: usize,
     font: &HashMap<char, usize>,
-) -> Result<String, LineBreakErr> {
+) -> Result<String, NoLegalLinebreakOpportunity> {
     // Set up our output string and retrieve our linebreak information
     let mut output = String::new();
     let mut breakers = linebreaks(input);
@@ -43,7 +43,7 @@ pub fn apply_newlines(
             }
 
             // Add the width of this character
-            current_width += font.get(c).ok_or(LineBreakErr::MissingCharacterWidth(*c))?;
+            current_width += font.get(c).unwrap_or(&0);
 
             // We weren't over the limit, so we can continue -- but if this is a safe
             // break point, let's remember that
@@ -68,10 +68,9 @@ pub fn apply_newlines(
                     applied_line_break = true;
                     break;
                 } else {
-                    return Err(LineBreakErr::NoLegalLinebreakOpportunity);
+                    return Err(NoLegalLinebreakOpportunity);
                 }
             }
-
         }
 
         // Once we're here, we check if we made it to the end of our characters.
@@ -87,19 +86,14 @@ pub fn apply_newlines(
     Ok(output)
 }
 
-#[derive(Debug, thiserror::Error, PartialEq, Eq, Clone, Copy)]
-pub enum LineBreakErr {
-    #[error("missing character width for `{0}`")]
-    MissingCharacterWidth(char),
-    #[error("no legal linebreak opportunity found")]
-    NoLegalLinebreakOpportunity,
-}
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct NoLegalLinebreakOpportunity;
 
 fn break_property(codepoint: u32) -> BreakClass {
     let codepoint = codepoint as usize;
     match PAGE_INDICES.get(codepoint >> 8) {
         Some(&page_idx) if page_idx & UNIFORM_PAGE != 0 => unsafe {
-            mem::transmute((page_idx & !UNIFORM_PAGE) as u8)
+            mem::transmute::<u8, BreakClass>((page_idx & !UNIFORM_PAGE) as u8)
         },
         Some(&page_idx) => BREAK_PROP_DATA[page_idx][codepoint & 0xFF],
         None => BreakClass::Unknown,
@@ -173,12 +167,9 @@ mod tests {
 
         assert_eq!(
             apply_newlines("Supercalifragalisticexpialidocious", 30, &make_font()).unwrap_err(),
-            LineBreakErr::NoLegalLinebreakOpportunity
+            NoLegalLinebreakOpportunity
         );
 
-        assert_eq!(
-            apply_newlines("≤", 30, &make_font()).unwrap_err(),
-            LineBreakErr::MissingCharacterWidth('≤')
-        );
+        assert_eq!(apply_newlines("≤", 30, &make_font()).unwrap(), "≤");
     }
 }

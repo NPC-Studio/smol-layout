@@ -334,8 +334,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     // Synthesize all non-"safe" pairs from pair table. There are generally more safe pairs.
-    let unsafe_pairs = (0..NUM_CLASSES).into_iter().flat_map(|j| {
-        (0..NUM_CLASSES).into_iter().filter_map(move |i| {
+    let unsafe_pairs = (0..NUM_CLASSES).flat_map(|j| {
+        (0..NUM_CLASSES).filter_map(move |i| {
             // All states that could have resulted from break class "i"
             let possible_states = pair_table
                 .iter()
